@@ -1,26 +1,9 @@
-# simple-async-combine
+// https://jestjs.io/zh-Hans/docs/api
 
-异步合并方法
+import asyncCombine from '@/index';
 
-## 安装
-
-```
-npm i simple-async-combine
-```
-
-## 依赖
-
-- simple-deferred2
-
-
-## 使用
-
-### 相同参数调用
-
-```ts
-import asyncCombine from 'simple-async-combine';
-
-let count = 0;
+test('base', async () => {
+  let count = 0;
   let _args: number[] = [];
   const handle = asyncCombine((...args:number[]) => new Promise(resolve => {
     setTimeout(() => {
@@ -31,17 +14,14 @@ let count = 0;
   }));
 
   const results = await Promise.all([handle(1, 2), handle(1, 2)]);
-  // count === 1
-  // results === ['aa', 'aa']
-  // _args = [1, 2]
-```
 
-### 忽略不同参数调用
+  expect(count).toEqual(1);
+  expect(results).toEqual(['aa', 'aa']);
+  expect(_args).toEqual([1, 2]);
+});
 
-```ts
-import asyncCombine from 'simple-async-combine';
-
-let count = 0;
+test('ignoreArguments', async () => {
+  let count = 0;
   let _args: number[] = [];
   const handle = asyncCombine((...args:number[]) => new Promise(resolve => {
     setTimeout(() => {
@@ -52,17 +32,14 @@ let count = 0;
   }), { ignoreArguments: true });
 
   const results = await Promise.all([handle(1, 2), handle(2, 3)]);
-  // count === 1
-  // results === ['aa', 'aa']
-  // _args = [1, 2]
-```
 
-### 混合情况参数调用
+  expect(count).toEqual(1);
+  expect(results).toEqual(['aa', 'aa']);
+  expect(_args).toEqual([1, 2]);
+});
 
-```ts
-import asyncCombine from 'simple-async-combine';
-
-let count = 0;
+test('混合', async () => {
+  let count = 0;
   const _args: number[][] = [];
   const handle = asyncCombine((...args:number[]) => new Promise(resolve => {
     setTimeout(() => {
@@ -78,7 +55,11 @@ let count = 0;
     handle(2, 3)
   ]);
 
-  // count === 2
-  // results === [[1, 2],[1, 2],[2, 3]]
-  // _args === [[1, 2], [2, 3]]
-```
+  expect(count).toEqual(2);
+  expect(results).toEqual([
+    [1, 2],
+    [1, 2],
+    [2, 3]
+  ]);
+  expect(_args).toEqual([[1, 2], [2, 3]]);
+});
